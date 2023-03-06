@@ -9,11 +9,12 @@ func Execute(proc Proc) error {
 	queue.enqueue(proc)
 	for !queue.empty() {
 		proc, _ := queue.dequeue()
-		newProcs, err := proc.Run(buf[:0])
+		buf = buf[:0]
+		err := proc.Run(&buf)
 		if err != nil {
 			return err
 		}
-		for _, newProc := range newProcs {
+		for _, newProc := range buf {
 			queue.enqueue(newProc)
 		}
 	}

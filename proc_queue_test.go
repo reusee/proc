@@ -8,8 +8,8 @@ import (
 
 type intProc int
 
-func (intProc) Run([]Proc) ([]Proc, error) {
-	return nil, nil
+func (intProc) Run(*[]Proc) error {
+	return nil
 }
 
 func TestProcQueue(t *testing.T) {
