@@ -26,3 +26,16 @@ func TestExecute(t *testing.T) {
 	}
 
 }
+
+func BenchmarkExecute(b *testing.B) {
+	var proc ProcFunc
+	i := 0
+	proc = func() ([]Proc, error) {
+		i++
+		if i == b.N {
+			return nil, nil
+		}
+		return []Proc{proc}, nil
+	}
+	Execute(proc)
+}
