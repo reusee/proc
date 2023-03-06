@@ -8,7 +8,7 @@ import (
 
 type intProc int
 
-func (intProc) Run() ([]Proc, error) {
+func (intProc) Run([]Proc) ([]Proc, error) {
 	return nil, nil
 }
 

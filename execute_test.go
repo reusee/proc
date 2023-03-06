@@ -7,13 +7,14 @@ func TestExecute(t *testing.T) {
 	var adder func(i int, p *int) ProcFunc
 	adder = func(i int, p *int) ProcFunc {
 		if i == 0 {
-			return func() ([]Proc, error) {
+			return func(procs []Proc) ([]Proc, error) {
 				return nil, nil
 			}
 		}
-		return func() ([]Proc, error) {
+		return func(procs []Proc) ([]Proc, error) {
 			*p++
-			return []Proc{adder(i-1, p)}, nil
+			procs = append(procs, adder(i-1, p))
+			return procs, nil
 		}
 	}
 
@@ -30,12 +31,13 @@ func TestExecute(t *testing.T) {
 func BenchmarkExecute(b *testing.B) {
 	var proc ProcFunc
 	i := 0
-	proc = func() ([]Proc, error) {
+	proc = func(procs []Proc) ([]Proc, error) {
 		i++
 		if i == b.N {
 			return nil, nil
 		}
-		return []Proc{proc}, nil
+		procs = append(procs, proc)
+		return procs, nil
 	}
 	Execute(proc)
 }

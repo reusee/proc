@@ -1,9 +1,9 @@
 package proc
 
-type ProcFunc func() ([]Proc, error)
+type ProcFunc func([]Proc) ([]Proc, error)
 
 var _ Proc = ProcFunc(nil)
 
-func (p ProcFunc) Run() ([]Proc, error) {
-	return p()
+func (p ProcFunc) Run(procs []Proc) ([]Proc, error) {
+	return p(procs)
 }
