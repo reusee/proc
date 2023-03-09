@@ -17,9 +17,10 @@ type procQueuePart struct {
 var procQueuePartPool = pr2.NewPool(
 	256,
 	func(put pr2.PoolPutFunc) *procQueuePart {
-		ret := new(procQueuePart)
-		ret.put = put
-		return ret
+		return &procQueuePart{
+			procs: make([]Proc, 0, maxProcQueuePartCapacity),
+			put:   put,
+		}
 	},
 )
 
