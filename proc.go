@@ -8,8 +8,8 @@ type Next struct {
 	procs []Proc
 }
 
-func (n *Next) Add(procs ...Proc) {
-	n.procs = append(n.procs, procs...)
+func (n *Next) Add(proc Proc) {
+	n.procs = append(n.procs, proc)
 }
 
 func (n *Next) reset() {
