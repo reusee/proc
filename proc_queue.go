@@ -1,8 +1,6 @@
 package proc
 
 import (
-	"io"
-
 	"github.com/reusee/pr2"
 )
 
@@ -97,7 +95,7 @@ var _ Proc = new(ProcQueue)
 
 func (q *ProcQueue) Run(next *Next) error {
 	if q.empty() {
-		return io.EOF
+		return nil
 	}
 	next.reset()
 	proc, _ := q.dequeue()
@@ -115,13 +113,12 @@ func (q *ProcQueue) RunAll() error {
 	next, put := nextsPool.Get()
 	defer put()
 	for {
-		err := q.Run(next)
-		if err == io.EOF {
-			break
+		if q.empty() {
+			return nil
 		}
+		err := q.Run(next)
 		if err != nil {
 			return err
 		}
 	}
-	return nil
 }
