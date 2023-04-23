@@ -1,5 +1,7 @@
 package proc
 
+import "github.com/reusee/pr2"
+
 type Proc interface {
 	Run(*Next) error
 }
@@ -15,3 +17,12 @@ func (n *Next) Add(proc Proc) {
 func (n *Next) reset() {
 	n.procs = n.procs[:0]
 }
+
+var nextsPool = pr2.NewPool(
+	128,
+	func(_ pr2.PoolPutFunc) *Next {
+		return &Next{
+			procs: make([]Proc, 0, 8),
+		}
+	},
+)
