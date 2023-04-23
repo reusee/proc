@@ -13,7 +13,7 @@ func (intProc) Run(next *Next) error {
 }
 
 func TestProcQueue(t *testing.T) {
-	q := newProcQueue()
+	q := NewProcQueue()
 	defer q.end()
 	for i := 0; i < maxProcQueuePartCapacity*128; i++ {
 		q.enqueue(intProc(i))
@@ -26,7 +26,7 @@ func TestProcQueue(t *testing.T) {
 }
 
 func BenchmarkProcQueueEnqueue(b *testing.B) {
-	q := newProcQueue()
+	q := NewProcQueue()
 	defer q.end()
 	for i := 0; i < b.N; i++ {
 		q.enqueue(nil)
@@ -34,7 +34,7 @@ func BenchmarkProcQueueEnqueue(b *testing.B) {
 }
 
 func BenchmarkProcQueueEnqueueAndDequeue(b *testing.B) {
-	q := newProcQueue()
+	q := NewProcQueue()
 	defer q.end()
 	for i := 0; i < b.N; i++ {
 		q.enqueue(nil)
@@ -42,5 +42,50 @@ func BenchmarkProcQueueEnqueueAndDequeue(b *testing.B) {
 		if !ok {
 			b.Fatal()
 		}
+	}
+}
+
+func TestProcQueueRun(t *testing.T) {
+
+	var adder func(i int, p *int) ProcFunc
+	adder = func(i int, p *int) ProcFunc {
+		if i == 0 {
+			return func(next *Next) error {
+				return nil
+			}
+		}
+		return func(next *Next) error {
+			*p++
+			next.Add(adder(i-1, p))
+			return nil
+		}
+	}
+
+	n := 0
+	queue := NewProcQueue(adder(5, &n))
+	if err := queue.RunAll(); err != nil {
+		t.Fatal(err)
+	}
+	if n != 5 {
+		t.Fatal()
+	}
+
+}
+
+func BenchmarkProcQueueRun(b *testing.B) {
+	var proc ProcFunc
+	i := 0
+	proc = func(next *Next) error {
+		i++
+		if i == b.N {
+			return nil
+		}
+		next.Add(proc)
+		return nil
+	}
+	queue := NewProcQueue(proc)
+	b.ResetTimer()
+	if err := queue.RunAll(); err != nil {
+		b.Fatal(err)
 	}
 }
