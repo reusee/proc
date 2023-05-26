@@ -3,7 +3,7 @@ module github.com/reusee/proc
 go 1.20
 
 require (
-	github.com/reusee/pr2 v0.0.0-20230306155640-52a016ca8efe
+	github.com/reusee/pr2 v0.0.0-20230520013926-e3502630520e
 	github.com/stretchr/testify v1.8.2
 )
 

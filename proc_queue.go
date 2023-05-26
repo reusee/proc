@@ -13,21 +13,24 @@ type procQueuePart struct {
 	procs []Proc
 	begin int
 	next  *procQueuePart
-	put   pr2.PoolPutFunc
+	put   func() bool
 }
 
 var procQueuePartPool = pr2.NewPool(
 	256,
-	func(put pr2.PoolPutFunc) *procQueuePart {
+	func() *procQueuePart {
 		return &procQueuePart{
 			procs: make([]Proc, 0, maxProcQueuePartCapacity),
-			put:   put,
 		}
 	},
 )
 
 func NewProcQueue(procs ...Proc) *ProcQueue {
-	part, _ := procQueuePartPool.Get()
+	var part *procQueuePart
+	put := procQueuePartPool.Get(&part)
+	if part.put == nil {
+		part.put = put
+	}
 	queue := &ProcQueue{
 		head: part,
 		tail: part,
@@ -54,7 +57,11 @@ func (p *procQueuePart) reset() {
 func (p *ProcQueue) enqueue(proc Proc) {
 	if len(p.head.procs) >= maxProcQueuePartCapacity {
 		// extend
-		newPart, _ := procQueuePartPool.Get()
+		var newPart *procQueuePart
+		put := procQueuePartPool.Get(&newPart)
+		if newPart.put == nil {
+			newPart.put = put
+		}
 		newPart.reset()
 		p.head.next = newPart
 		p.head = newPart
@@ -110,7 +117,8 @@ func (q *ProcQueue) Run(next *Next) error {
 }
 
 func (q *ProcQueue) RunAll() error {
-	next, put := nextsPool.Get()
+	var next *Next
+	put := nextsPool.Get(&next)
 	defer put()
 	for {
 		if q.empty() {

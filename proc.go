@@ -20,7 +20,7 @@ func (n *Next) reset() {
 
 var nextsPool = pr2.NewPool(
 	128,
-	func(_ pr2.PoolPutFunc) *Next {
+	func() *Next {
 		return &Next{
 			procs: make([]Proc, 0, 8),
 		}
