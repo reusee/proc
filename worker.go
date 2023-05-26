@@ -45,7 +45,9 @@ loop:
 			case <-ctx.Done():
 				break loop
 			case proc := <-w.newProcChan:
-				w.queue.enqueue(proc)
+				if proc != nil {
+					w.queue.enqueue(proc)
+				}
 			}
 
 		} else {
@@ -53,7 +55,9 @@ loop:
 			case <-ctx.Done():
 				break loop
 			case proc := <-w.newProcChan:
-				w.queue.enqueue(proc)
+				if proc != nil {
+					w.queue.enqueue(proc)
+				}
 			default:
 				w.next.reset()
 				proc, _ := w.queue.dequeue()
