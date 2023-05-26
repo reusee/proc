@@ -108,3 +108,17 @@ func TestWorkerCanceledCtx(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func BenchmarkWorker(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		w := NewWorker(context.Background())
+		if err := w.Do(ProcFunc(func(_ *Next) error {
+			return nil
+		})); err != nil {
+			b.Fatal(err)
+		}
+		if err := w.Close(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
