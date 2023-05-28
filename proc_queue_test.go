@@ -8,8 +8,7 @@ import (
 
 type intProc int
 
-func (intProc) Run(next *Next) error {
-	return nil
+func (intProc) Run(next *Next) {
 }
 
 func TestProcQueue(t *testing.T) {
@@ -50,22 +49,18 @@ func TestProcQueueRun(t *testing.T) {
 	var adder func(i int, p *int) ProcFunc
 	adder = func(i int, p *int) ProcFunc {
 		if i == 0 {
-			return func(next *Next) error {
-				return nil
+			return func(next *Next) {
 			}
 		}
-		return func(next *Next) error {
+		return func(next *Next) {
 			*p++
 			next.Add(adder(i-1, p))
-			return nil
 		}
 	}
 
 	n := 0
 	queue := NewProcQueue(adder(5, &n))
-	if err := queue.RunAll(); err != nil {
-		t.Fatal(err)
-	}
+	queue.RunAll()
 	if n != 5 {
 		t.Fatal()
 	}
@@ -75,17 +70,14 @@ func TestProcQueueRun(t *testing.T) {
 func BenchmarkProcQueueRun(b *testing.B) {
 	var proc ProcFunc
 	i := 0
-	proc = func(next *Next) error {
+	proc = func(next *Next) {
 		i++
 		if i == b.N {
-			return nil
+			return
 		}
 		next.Add(proc)
-		return nil
 	}
 	queue := NewProcQueue(proc)
 	b.ResetTimer()
-	if err := queue.RunAll(); err != nil {
-		b.Fatal(err)
-	}
+	queue.RunAll()
 }

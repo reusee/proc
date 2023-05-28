@@ -13,7 +13,6 @@ type Worker struct {
 	cancel      context.CancelFunc
 	newProcChan chan Proc
 	next        Next
-	err         error
 }
 
 func NewWorker(ctx context.Context) *Worker {
@@ -61,14 +60,7 @@ loop:
 			default:
 				w.next.reset()
 				proc, _ := w.queue.dequeue()
-				err := proc.Run(&w.next)
-				if err != nil {
-					w.mutex.Lock()
-					w.err = err
-					w.mutex.Unlock()
-					w.cancel()
-					return
-				}
+				proc.Run(&w.next)
 				for _, newProc := range w.next.procs {
 					w.queue.enqueue(newProc)
 				}
@@ -78,13 +70,7 @@ loop:
 	}
 
 	// do rest works
-	if err := w.queue.RunAll(); err != nil {
-		w.mutex.Lock()
-		w.err = err
-		w.mutex.Unlock()
-		w.cancel()
-		return
-	}
+	w.queue.RunAll()
 
 }
 
@@ -104,5 +90,5 @@ func (w *Worker) Close() error {
 	for w.queue != nil {
 		w.cond.Wait()
 	}
-	return w.err
+	return nil
 }

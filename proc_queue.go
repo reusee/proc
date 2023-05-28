@@ -100,33 +100,26 @@ func (p *ProcQueue) end() {
 
 var _ Proc = new(ProcQueue)
 
-func (q *ProcQueue) Run(next *Next) error {
+func (q *ProcQueue) Run(next *Next) {
 	if q.empty() {
-		return nil
+		return
 	}
 	next.reset()
 	proc, _ := q.dequeue()
-	err := proc.Run(next)
-	if err != nil {
-		return err
-	}
+	proc.Run(next)
 	for _, newProc := range next.procs {
 		q.enqueue(newProc)
 	}
-	return nil
 }
 
-func (q *ProcQueue) RunAll() error {
+func (q *ProcQueue) RunAll() {
 	var next *Next
 	put := nextsPool.Get(&next)
 	defer put()
 	for {
 		if q.empty() {
-			return nil
+			return
 		}
-		err := q.Run(next)
-		if err != nil {
-			return err
-		}
+		q.Run(next)
 	}
 }

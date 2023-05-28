@@ -3,7 +3,6 @@ package proc
 import (
 	"context"
 	"errors"
-	"io"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -13,13 +12,12 @@ func TestWorker(t *testing.T) {
 	n := 0
 	max := 1024
 	var proc ProcFunc
-	proc = func(next *Next) error {
+	proc = func(next *Next) {
 		n++
 		if n == max {
-			return nil
+			return
 		}
 		next.Add(proc)
-		return nil
 	}
 
 	w := NewWorker(context.Background())
@@ -42,23 +40,6 @@ func TestWorker(t *testing.T) {
 	}
 }
 
-func TestWorkerError(t *testing.T) {
-	w := NewWorker(context.Background())
-	if err := w.Do(ProcFunc(func(_ *Next) error {
-		return io.EOF
-	})); err != nil {
-		t.Fatal(err)
-	}
-	err := w.Close()
-	if !errors.Is(err, io.EOF) {
-		t.Fatal()
-	}
-	err = w.Close()
-	if !errors.Is(err, io.EOF) {
-		t.Fatal()
-	}
-}
-
 func TestWorkerConcurrent(t *testing.T) {
 	w := NewWorker(context.Background())
 	wg := new(sync.WaitGroup)
@@ -68,9 +49,8 @@ func TestWorkerConcurrent(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			defer wg.Done()
-			if err := w.Do(ProcFunc(func(_ *Next) error {
+			if err := w.Do(ProcFunc(func(_ *Next) {
 				c.Add(1)
-				return nil
 			})); err != nil {
 				panic(err)
 			}
@@ -112,8 +92,7 @@ func TestWorkerCanceledCtx(t *testing.T) {
 func BenchmarkWorker(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		w := NewWorker(context.Background())
-		if err := w.Do(ProcFunc(func(_ *Next) error {
-			return nil
+		if err := w.Do(ProcFunc(func(_ *Next) {
 		})); err != nil {
 			b.Fatal(err)
 		}

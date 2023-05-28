@@ -3,7 +3,7 @@ package proc
 import "github.com/reusee/pr2"
 
 type Proc interface {
-	Run(*Next) error
+	Run(*Next)
 }
 
 type Next struct {

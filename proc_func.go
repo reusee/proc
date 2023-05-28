@@ -1,9 +1,9 @@
 package proc
 
-type ProcFunc func(*Next) error
+type ProcFunc func(*Next)
 
 var _ Proc = ProcFunc(nil)
 
-func (p ProcFunc) Run(next *Next) error {
-	return p(next)
+func (p ProcFunc) Run(next *Next) {
+	p(next)
 }
