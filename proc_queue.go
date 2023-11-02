@@ -104,7 +104,6 @@ func (q *ProcQueue) Step(ctrl *Control) {
 	if q.empty() {
 		return
 	}
-	ctrl.reset()
 	proc, _ := q.dequeue()
 	proc.Step(ctrl)
 	for _, newProc := range ctrl.procs {
@@ -120,6 +119,7 @@ func (q *ProcQueue) Run() {
 		if q.empty() {
 			return
 		}
+		ctrl.reset()
 		q.Step(ctrl)
 	}
 }
