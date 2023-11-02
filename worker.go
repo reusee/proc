@@ -27,6 +27,8 @@ func NewWorker(ctx context.Context) *Worker {
 	return ret
 }
 
+const maxSteps = 32
+
 func (w *Worker) start(ctx context.Context) {
 	defer func() {
 		w.mutex.Lock()
@@ -36,6 +38,7 @@ func (w *Worker) start(ctx context.Context) {
 	}()
 
 	var ctrl Control
+	var steps int
 loop:
 	for {
 
@@ -58,11 +61,22 @@ loop:
 					w.queue.enqueue(proc)
 				}
 			default:
-				ctrl.reset()
 				proc, _ := w.queue.dequeue()
-				proc.Step(&ctrl)
-				for _, newProc := range ctrl.procs {
-					w.queue.enqueue(newProc)
+				steps = 0
+				for {
+					ctrl.reset()
+					proc.Step(&ctrl)
+					if len(ctrl.procs) == 1 {
+						if steps < maxSteps {
+							steps++
+							proc = ctrl.procs[0]
+							continue
+						}
+					}
+					for _, newProc := range ctrl.procs {
+						w.queue.enqueue(newProc)
+					}
+					break
 				}
 			}
 		}
