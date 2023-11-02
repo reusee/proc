@@ -8,7 +8,7 @@ import (
 
 type intProc int
 
-func (intProc) Run(next *Next) {
+func (intProc) Step(next *Next) {
 }
 
 func TestProcQueue(t *testing.T) {
@@ -60,7 +60,7 @@ func TestProcQueueRun(t *testing.T) {
 
 	n := 0
 	queue := NewProcQueue(adder(5, &n))
-	queue.RunAll()
+	queue.Run()
 	if n != 5 {
 		t.Fatal()
 	}
@@ -79,5 +79,5 @@ func BenchmarkProcQueueRun(b *testing.B) {
 	}
 	queue := NewProcQueue(proc)
 	b.ResetTimer()
-	queue.RunAll()
+	queue.Run()
 }

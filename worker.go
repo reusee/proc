@@ -60,7 +60,7 @@ loop:
 			default:
 				w.next.reset()
 				proc, _ := w.queue.dequeue()
-				proc.Run(&w.next)
+				proc.Step(&w.next)
 				for _, newProc := range w.next.procs {
 					w.queue.enqueue(newProc)
 				}
@@ -70,7 +70,7 @@ loop:
 	}
 
 	// do rest works
-	w.queue.RunAll()
+	w.queue.Run()
 
 }
 
