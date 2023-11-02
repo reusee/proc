@@ -100,26 +100,26 @@ func (p *ProcQueue) end() {
 
 var _ Proc = new(ProcQueue)
 
-func (q *ProcQueue) Step(next *Next) {
+func (q *ProcQueue) Step(ctrl *Control) {
 	if q.empty() {
 		return
 	}
-	next.reset()
+	ctrl.reset()
 	proc, _ := q.dequeue()
-	proc.Step(next)
-	for _, newProc := range next.procs {
+	proc.Step(ctrl)
+	for _, newProc := range ctrl.procs {
 		q.enqueue(newProc)
 	}
 }
 
 func (q *ProcQueue) Run() {
-	var next *Next
-	put := nextsPool.Get(&next)
+	var ctrl *Control
+	put := controlsPool.Get(&ctrl)
 	defer put()
 	for {
 		if q.empty() {
 			return
 		}
-		q.Step(next)
+		q.Step(ctrl)
 	}
 }

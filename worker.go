@@ -12,7 +12,6 @@ type Worker struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
 	newProcChan chan Proc
-	next        Next
 }
 
 func NewWorker(ctx context.Context) *Worker {
@@ -36,6 +35,7 @@ func (w *Worker) start(ctx context.Context) {
 		w.cond.Broadcast()
 	}()
 
+	var ctrl Control
 loop:
 	for {
 
@@ -58,10 +58,10 @@ loop:
 					w.queue.enqueue(proc)
 				}
 			default:
-				w.next.reset()
+				ctrl.reset()
 				proc, _ := w.queue.dequeue()
-				proc.Step(&w.next)
-				for _, newProc := range w.next.procs {
+				proc.Step(&ctrl)
+				for _, newProc := range ctrl.procs {
 					w.queue.enqueue(newProc)
 				}
 			}

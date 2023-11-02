@@ -3,25 +3,25 @@ package proc
 import "github.com/reusee/pr2"
 
 type Proc interface {
-	Step(*Next)
+	Step(*Control)
 }
 
-type Next struct {
+type Control struct {
 	procs []Proc
 }
 
-func (n *Next) Add(proc Proc) {
+func (n *Control) Next(proc Proc) {
 	n.procs = append(n.procs, proc)
 }
 
-func (n *Next) reset() {
+func (n *Control) reset() {
 	n.procs = n.procs[:0]
 }
 
-var nextsPool = pr2.NewPool(
+var controlsPool = pr2.NewPool(
 	128,
-	func() *Next {
-		return &Next{
+	func() *Control {
+		return &Control{
 			procs: make([]Proc, 0, 8),
 		}
 	},

@@ -8,7 +8,7 @@ import (
 
 type intProc int
 
-func (intProc) Step(next *Next) {
+func (intProc) Step(ctrl *Control) {
 }
 
 func TestProcQueue(t *testing.T) {
@@ -49,12 +49,12 @@ func TestProcQueueRun(t *testing.T) {
 	var adder func(i int, p *int) ProcFunc
 	adder = func(i int, p *int) ProcFunc {
 		if i == 0 {
-			return func(next *Next) {
+			return func(ctrl *Control) {
 			}
 		}
-		return func(next *Next) {
+		return func(ctrl *Control) {
 			*p++
-			next.Add(adder(i-1, p))
+			ctrl.Next(adder(i-1, p))
 		}
 	}
 
@@ -70,12 +70,12 @@ func TestProcQueueRun(t *testing.T) {
 func BenchmarkProcQueueRun(b *testing.B) {
 	var proc ProcFunc
 	i := 0
-	proc = func(next *Next) {
+	proc = func(ctrl *Control) {
 		i++
 		if i == b.N {
 			return
 		}
-		next.Add(proc)
+		ctrl.Next(proc)
 	}
 	queue := NewProcQueue(proc)
 	b.ResetTimer()

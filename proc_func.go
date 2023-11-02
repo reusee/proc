@@ -1,9 +1,9 @@
 package proc
 
-type ProcFunc func(*Next)
+type ProcFunc func(*Control)
 
 var _ Proc = ProcFunc(nil)
 
-func (p ProcFunc) Step(next *Next) {
-	p(next)
+func (p ProcFunc) Step(ctrl *Control) {
+	p(ctrl)
 }

@@ -12,12 +12,12 @@ func TestWorker(t *testing.T) {
 	n := 0
 	max := 1024
 	var proc ProcFunc
-	proc = func(next *Next) {
+	proc = func(ctrl *Control) {
 		n++
 		if n == max {
 			return
 		}
-		next.Add(proc)
+		ctrl.Next(proc)
 	}
 
 	w := NewWorker(context.Background())
@@ -49,7 +49,7 @@ func TestWorkerConcurrent(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			defer wg.Done()
-			if err := w.Do(ProcFunc(func(_ *Next) {
+			if err := w.Do(ProcFunc(func(*Control) {
 				c.Add(1)
 			})); err != nil {
 				panic(err)
@@ -92,7 +92,7 @@ func TestWorkerCanceledCtx(t *testing.T) {
 func BenchmarkWorker(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		w := NewWorker(context.Background())
-		if err := w.Do(ProcFunc(func(_ *Next) {
+		if err := w.Do(ProcFunc(func(*Control) {
 		})); err != nil {
 			b.Fatal(err)
 		}
