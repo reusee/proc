@@ -90,14 +90,16 @@ func TestWorkerCanceledCtx(t *testing.T) {
 }
 
 func BenchmarkWorker(b *testing.B) {
+	w := NewWorker(context.Background())
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w := NewWorker(context.Background())
 		if err := w.Do(ProcFunc(func(*Control) {
 		})); err != nil {
 			b.Fatal(err)
 		}
-		if err := w.Close(); err != nil {
-			b.Fatal(err)
-		}
+	}
+	b.StopTimer()
+	if err := w.Close(); err != nil {
+		b.Fatal(err)
 	}
 }
